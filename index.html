@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Object Detection System</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px 0;
+    font-size: 28px;
+}
+.container {
+    background: white;
+    width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+#status {
+    font-size: 30px;
+    color: green;
+    margin: 20px 0;
+}
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+img {
+    width: 200px;
+    margin: 20px 0;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+}
+</style>
+</head>
+<body>
+
+<header>Object Detection System</header>
+
+<div class="container">
+    <p id="status">No Object Detected</p>
+    <button onclick="detect()">Simulate Object</button>
+    <button onclick="window.location.href='payment.html'">Go to Payment Page</button>
+
+    
+</div>
+
+<script>
+function detect() {
+    document.getElementById("status").innerHTML = "Object Detected";
+    document.getElementById("status").style.color = "red";
+}
+</script>
+
+</body>
+</html>

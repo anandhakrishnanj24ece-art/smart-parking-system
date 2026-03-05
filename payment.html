@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Payment Page</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #2196F3;
+    color: white;
+    padding: 20px 0;
+    font-size: 28px;
+}
+.container {
+    background: white;
+    width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+img {
+    width: 200px;
+    margin: 20px 0;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+}
+button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+p {
+    font-size: 18px;
+    margin: 5px 0;
+}
+</style>
+</head>
+<body>
+
+<header>Payment Page</header>
+
+<div class="container">
+    <p><b>Bank Name:</b> ABC Bank</p>
+    <p><b>Account Name:</b> John Doe</p>
+    <p><b>Account Number:</b> 1234567890</p>
+    <p><b>IFSC:</b> ABCD0123456</p>
+
+    <h3>Scan QR to Pay</h3>
+    <img src="qr_payment.png" alt="Payment QR">
+
+    <button onclick="window.location.href='index.html'">Back to Home</button>
+</div>
+
+</body>
+</html>
