@@ -1,63 +1,408 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<title>Payment Page</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f2f2f2;
-    margin: 0;
-    padding: 0;
-}
-header {
-    background-color: #2196F3;
-    color: white;
-    padding: 20px 0;
-    font-size: 28px;
-}
-.container {
-    background: white;
-    width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-}
-img {
-    width: 200px;
-    margin: 20px 0;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-}
-button {
-    padding: 10px 20px;
-    font-size: 18px;
-    margin: 10px;
-    cursor: pointer;
-    border-radius: 8px;
-}
-p {
-    font-size: 18px;
-    margin: 5px 0;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Payment</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            text-align: center;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #ffffff;
+            width: 100%;
+            padding: 16px 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .logo-g {
+            color: #5f6368;
+        }
+
+        .logo-pay {
+            color: #1a73e8;
+            margin-left: 2px;
+        }
+
+        .container {
+            background: white;
+            width: 90%;
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 40px 24px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .merchant-info {
+            margin-bottom: 24px;
+        }
+
+        .merchant-initial {
+            width: 60px;
+            height: 60px;
+            background-color: #1a73e8;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .merchant-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 4px;
+        }
+
+        .merchant-upi {
+            font-size: 14px;
+            color: #5f6368;
+        }
+
+        .amount-container {
+            margin: 24px 0;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+
+        .amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #202124;
+        }
+
+        .qr-wrapper {
+            background: #ffffff;
+            padding: 16px;
+            border: 2px solid #f1f3f4;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .qr-wrapper img {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #202124;
+            border: none;
+            border-bottom: 2px solid #1a73e8;
+            background: transparent;
+            text-align: center;
+            width: 100%;
+            max-width: 200px;
+            outline: none;
+            padding: 5px;
+        }
+
+        .amount:focus {
+            border-bottom-color: #1557b0;
+        }
+
+        .details-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+            font-size: 14px;
+            color: #5f6368;
+        }
+
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .details-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .details-label {
+            font-weight: 500;
+        }
+
+        .details-value {
+            color: #202124;
+            font-weight: 600;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #1a73e8;
+            border: 1px solid #1a73e8;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f8fbff;
+        }
+
+        /* Success Animation Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .success-circle {
+            width: 90px;
+            height: 90px;
+            background-color: #34a853;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 24px;
+            transform: scale(0);
+        }
+
+        .overlay.active .success-circle {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .check-icon {
+            color: white;
+            opacity: 0;
+        }
+
+        .overlay.active .check-icon {
+            animation: fadeIn 0.3s ease 0.4s forwards;
+        }
+
+        .success-title {
+            font-size: 28px;
+            color: #202124;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(20px);
+            margin-bottom: 8px;
+        }
+
+        .success-subtitle {
+            font-size: 16px;
+            color: #5f6368;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .overlay.active .success-title,
+        .overlay.active .success-subtitle {
+            animation: slideUpFade 0.4s ease 0.3s forwards;
+        }
+
+        .overlay.active .success-subtitle {
+            animation-delay: 0.1s;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUpFade {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-<header>Payment Page</header>
+    <header>
+        <div class="logo-container">
+            <span class="logo-g">G</span><span class="logo-pay">Pay</span>
+        </div>
+    </header>
 
-<div class="container">
-    <p><b>Bank Name:</b> ABC Bank</p>
-    <p><b>Account Name:</b> John Doe</p>
-    <p><b>Account Number:</b> 1234567890</p>
-    <p><b>IFSC:</b> ABCD0123456</p>
+    <div class="container">
+        <div class="merchant-info">
+            <div class="merchant-initial">A</div>
+            <div class="merchant-name">Akshaya Nagarajan</div>
+            <div class="merchant-upi">akshaya.nagarajan2007@okicici</div>
+        </div>
 
-    <h3>Scan QR to Pay</h3>
-    <img src="qr_payment.png" alt="Payment QR">
+        <div class="amount-container">
+            <label for="amountInput" class="amount-label">Enter Amount (₹)</label>
+            <input type="number" id="amountInput" class="amount" value="1.00" min="1" step="0.01"
+                oninput="updateQRCode()">
+        </div>
 
-    <button onclick="window.location.href='index.html'">Back to Home</button>
-</div>
+        <div class="qr-wrapper">
+            <!-- Dynamically generated QR code ensuring amounts match the input field -->
+            <img id="qrImage"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Dakshaya.nagarajan2007%40okicici%26pn%3DAkshaya%2BNagarajan%26am%3D1.00"
+                alt="Payment QR Code">
+        </div>
+
+        <div class="details-box">
+            <div class="details-row">
+                <span class="details-label">Bank</span>
+                <span class="details-value">ABC Bank</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">A/C No.</span>
+                <span class="details-value">•••• 7890</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">IFSC</span>
+                <span class="details-value">ABCD0123456</span>
+            </div>
+        </div>
+
+        <!-- Button triggers the confirmation animation -->
+        <button class="btn btn-primary" id="payBtn" onclick="simulatePayment()">I have made the payment</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel and Go Back</button>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="overlay" id="successOverlay">
+        <div class="success-circle">
+            <svg class="check-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <div class="success-title">Payment Confirmed</div>
+        <div class="success-subtitle">₹500.00 sent securely</div>
+
+        <div
+            style="margin-top: 40px; opacity: 0; animation: slideUpFade 0.4s ease 1s forwards; width: 100%; max-width: 300px;">
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Home</button>
+        </div>
+    </div>
+
+    <script>
+        function updateQRCode() {
+            const amount = document.getElementById('amountInput').value || '0.00';
+            const qrImage = document.getElementById('qrImage');
+            const qrData = `upi://pay?pa=akshaya.nagarajan2007@okicici&pn=Akshaya+Nagarajan&am=${amount}`;
+            qrImage.onerror = null; // Prevent infinite loop if API fails
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+        }
+
+        function simulatePayment() {
+            const btn = document.getElementById('payBtn');
+            const amount = document.getElementById('amountInput').value || '0.00';
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = 'Verifying payment...';
+            btn.style.opacity = '0.8';
+            btn.disabled = true;
+
+            // Update success message with the entered amount
+            document.querySelector('.success-subtitle').textContent = `₹${amount} sent securely`;
+
+            // Simulate server verification delay of 1.5 seconds
+            setTimeout(() => {
+                document.getElementById('successOverlay').classList.add('active');
+
+                // Reset button states immediately after triggering animation
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                }, 1000);
+            }, 1500);
+        }
+    </script>
 
 </body>
+
 </html>
