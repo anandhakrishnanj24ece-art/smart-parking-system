@@ -1,215 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Parking Status</title>
-    <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            text-align: center;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Parking System</title>
 
-        header {
-            background-color: #ffffff;
-            width: 100%;
-            padding: 16px 0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            font-size: 24px;
-            font-weight: 500;
-        }
+<style>
 
-        .logo-text {
-            color: #5f6368;
-        }
+body{
+font-family:'Inter',sans-serif;
+background:#f8f9fa;
+margin:0;
+text-align:center;
+display:flex;
+flex-direction:column;
+align-items:center;
+min-height:100vh;
+}
 
-        .logo-highlight {
-            color: #34a853;
-            margin-left: 4px;
-            font-weight: 600;
-        }
+header{
+background:white;
+width:100%;
+padding:16px 0;
+box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
 
-        .container {
-            background: white;
-            width: 90%;
-            max-width: 420px;
-            margin: 40px auto;
-            padding: 40px 24px;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
+.logo{
+font-size:24px;
+font-weight:600;
+}
 
-        .status-icon-wrapper {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #fce8e6;
-            /* Soft red for default state */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 24px;
-            transition: background-color 0.3s ease;
-        }
+.logo span{
+color:#34a853;
+}
 
-        .status-icon-wrapper.detected {
-            background-color: #e6f4ea;
-            /* Soft green */
-        }
+.container{
+background:white;
+width:90%;
+max-width:420px;
+margin-top:40px;
+padding:35px 20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
 
-        /* Status Text styling */
-        #status {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ea4335;
-            /* Google Red */
-            margin: 0 0 32px 0;
-            transition: color 0.3s ease;
-        }
+#status{
+font-size:26px;
+font-weight:700;
+color:#ea4335;
+margin-bottom:25px;
+}
 
-        #status.detected {
-            color: #34a853;
-            /* Google Green */
-        }
+.btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:50px;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+background:#1a73e8;
+color:white;
+margin-bottom:20px;
+}
 
-        /* Buttons matching payment.html */
-        .btn {
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 100px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 12px;
-        }
+.parking-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+margin-top:15px;
+}
 
-        .btn-primary {
-            background-color: #1a73e8;
-            color: white;
-            box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2);
-        }
+.slot{
+height:60px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:10px;
+font-weight:700;
+color:white;
+background:#ea4335;
+cursor:pointer;
+transition:0.3s;
+}
 
-        .btn-primary:hover {
-            background-color: #1557b0;
-            box-shadow: 0 6px 12px rgba(26, 115, 232, 0.3);
-        }
+.slot.free{
+background:#34a853;
+}
 
-        .btn-secondary {
-            background-color: transparent;
-            color: #1a73e8;
-            border: 1px solid #1a73e8;
-        }
-
-        .btn-secondary:hover {
-            background-color: #f8fbff;
-        }
-
-        /* Status SVG icons */
-        .icon {
-            width: 40px;
-            height: 40px;
-            stroke: #ea4335;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-            transition: stroke 0.3s ease;
-        }
-
-        .detected .icon {
-            stroke: #34a853;
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+</style>
 </head>
 
 <body>
 
-    <header>
-        <div class="logo-container">
-            <span class="logo-text">Smart</span><span class="logo-highlight">Parking</span>
-        </div>
-    </header>
+<header>
+<div class="logo">
+Smart <span>Parking</span>
+</div>
+</header>
 
-    <div class="container">
-        <div class="status-icon-wrapper" id="statusWrapper">
-            <svg class="icon" id="statusIcon" viewBox="0 0 24 24">
-                <!-- Connect State Icon -->
-                <path id="iconPath" d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-            </svg>
-        </div>
+<div class="container">
 
-        <p id="status">Connecting...</p>
-        <p style="color: #5f6368; font-weight: 500; margin-bottom: 24px;">Distance: <span id="distance"
-                style="color: #202124; font-weight: 700; font-size: 20px;">0</span> cm</p>
+<p id="status">Connecting...</p>
 
-        <button class="btn btn-primary" onclick="window.location.href='payment.html'">Go to Payment</button>
-    </div>
+<button class="btn" onclick="window.location.href='payment.html'">
+Go To Payment
+</button>
 
-    <script>
-        const client = new Paho.MQTT.Client("broker.hivemq.com", 8000, "client_" + Math.random());
+<h3>Parking Slots</h3>
 
-        client.onMessageArrived = (msg) => {
-            console.log(`[MQTT] Message arrived on topic ${msg.destinationName}:`, msg.payloadString);
-            try {
-                const data = JSON.parse(msg.payloadString);
+<div class="parking-grid">
 
-                // Update Text Data
-                const statusNode = document.getElementById("status");
-                statusNode.innerText = data.status || "Unknown";
-                document.getElementById("distance").innerText = data.distance || "0";
+<div id="slot1" class="slot" onclick="bookSlot(1)">1</div>
+<div id="slot2" class="slot" onclick="bookSlot(2)">2</div>
+<div id="slot3" class="slot" onclick="bookSlot(3)">3</div>
+<div id="slot4" class="slot" onclick="bookSlot(4)">4</div>
 
-                // Update UI Styling dynamically
-                const wrapper = document.getElementById("statusWrapper");
-                const iconPath = document.getElementById("iconPath");
+<div id="slot5" class="slot" onclick="bookSlot(5)">5</div>
+<div id="slot6" class="slot" onclick="bookSlot(6)">6</div>
+<div id="slot7" class="slot" onclick="bookSlot(7)">7</div>
+<div id="slot8" class="slot" onclick="bookSlot(8)">8</div>
 
-                if (data.status && data.status.toLowerCase().includes("free")) {
-                    statusNode.classList.add("detected");
-                    wrapper.classList.add("detected");
-                    iconPath.setAttribute("d", "M20 6L9 17l-5-5"); // Checkmark
-                } else {
-                    statusNode.classList.remove("detected");
-                    wrapper.classList.remove("detected");
-                    iconPath.setAttribute("d", "M18 6L6 18M6 6l12 12"); // X mark
-                }
-            } catch (e) {
-                console.error("Error parsing MQTT payload", e);
-            }
-        };
+</div>
 
-        client.connect({
-            onSuccess: () => {
-                console.log("[MQTT] Successfully connected to broker.hivemq.com:8000!");
-                document.getElementById("status").innerText = "Awaiting Data...";
-                client.subscribe("kon/parking/data");
-                console.log("[MQTT] Subscribed to topic: kon/parking/data");
-            },
-            onFailure: (err) => {
-                console.error("[MQTT] Connection failed!", err);
-                document.getElementById("status").innerText = "Connection Failed";
-            }
-        });
-    </script>
+</div>
+
+<script>
+
+/* MQTT CLIENT */
+
+const client = new Paho.MQTT.Client(
+"broker.hivemq.com",
+8000,
+"webclient_" + parseInt(Math.random()*10000)
+);
+
+/* WHEN MESSAGE ARRIVES */
+
+client.onMessageArrived = function(message){
+
+console.log("MQTT Message:",message.payloadString);
+
+let data = JSON.parse(message.payloadString);
+
+/* UPDATE STATUS */
+
+document.getElementById("status").innerText = data.status || "Unknown";
+
+/* UPDATE SLOT COLORS */
+
+for(let i=1;i<=8;i++){
+
+let slot = document.getElementById("slot"+i);
+
+if(data["slot"+i] === "Free"){
+
+slot.classList.add("free");
+
+}else{
+
+slot.classList.remove("free");
+
+}
+
+}
+
+};
+
+/* CONNECT TO MQTT */
+
+client.connect({
+
+onSuccess:function(){
+
+console.log("MQTT Connected");
+
+document.getElementById("status").innerText = "Waiting for data...";
+
+client.subscribe("kon/parking/data");
+
+},
+
+onFailure:function(){
+
+document.getElementById("status").innerText="Connection Failed";
+
+}
+
+});
+
+
+/* SLOT BOOKING */
+
+function bookSlot(slotNumber){
+
+let slot = document.getElementById("slot"+slotNumber);
+
+if(slot.classList.contains("free")){
+
+let confirmBooking = confirm("Book Slot "+slotNumber+" ?");
+
+if(confirmBooking){
+
+slot.classList.remove("free");
+
+let booking = {
+slot:slotNumber,
+action:"book"
+};
+
+let message = new Paho.MQTT.Message(JSON.stringify(booking));
+
+message.destinationName = "kon/parking/booking";
+
+client.send(message);
+
+alert("Slot "+slotNumber+" booked successfully!");
+
+}
+
+}else{
+
+alert("Slot "+slotNumber+" is already occupied!");
+
+}
+
+}
+
+</script>
 
 </body>
-
 </html>
