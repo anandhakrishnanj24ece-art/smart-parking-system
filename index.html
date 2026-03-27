@@ -6,7 +6,6 @@
 <title>Smart Parking System</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 
 <style>
 
@@ -69,7 +68,7 @@ margin-bottom:20px;
 
 .parking-grid{
 display:grid;
-grid-template-columns:repeat(4,1fr);
+grid-template-columns:repeat(2,1fr);
 gap:12px;
 margin-top:15px;
 }
@@ -82,13 +81,12 @@ justify-content:center;
 border-radius:10px;
 font-weight:700;
 color:white;
-background:#ea4335;
+background:#ea4335; /* red = occupied */
 cursor:pointer;
-transition:0.3s;
 }
 
 .slot.free{
-background:#34a853;
+background:#34a853; /* green = free */
 }
 
 </style>
@@ -97,14 +95,12 @@ background:#34a853;
 <body>
 
 <header>
-<div class="logo">
-Smart <span>Parking</span>
-</div>
+<div class="logo">Smart <span>Parking</span></div>
 </header>
 
 <div class="container">
 
-<p id="status">Connecting...</p>
+<p id="status">Loading...</p>
 
 <button class="btn" onclick="window.location.href='payment.html'">
 Go To Payment
@@ -113,124 +109,55 @@ Go To Payment
 <h3>Parking Slots</h3>
 
 <div class="parking-grid">
-
-<div id="slot1" class="slot" onclick="bookSlot(1)">1</div>
-<div id="slot2" class="slot" onclick="bookSlot(2)">2</div>
-<div id="slot3" class="slot" onclick="bookSlot(3)">3</div>
-<div id="slot4" class="slot" onclick="bookSlot(4)">4</div>
-
-<div id="slot5" class="slot" onclick="bookSlot(5)">5</div>
-<div id="slot6" class="slot" onclick="bookSlot(6)">6</div>
-<div id="slot7" class="slot" onclick="bookSlot(7)">7</div>
-<div id="slot8" class="slot" onclick="bookSlot(8)">8</div>
-
+  <div id="slot1" class="slot">1</div>
+  <div id="slot2" class="slot">2</div>
+  <div id="slot3" class="slot">3</div>
+  <div id="slot4" class="slot">4</div>
 </div>
 
 </div>
 
-<script>
+<!-- Firebase Script -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* MQTT CLIENT */
-
-const client = new Paho.MQTT.Client(
-"broker.hivemq.com",
-8000,
-"webclient_" + parseInt(Math.random()*10000)
-);
-
-/* WHEN MESSAGE ARRIVES */
-
-client.onMessageArrived = function(message){
-
-console.log("MQTT Message:",message.payloadString);
-
-let data = JSON.parse(message.payloadString);
-
-/* UPDATE STATUS */
-
-document.getElementById("status").innerText = data.status || "Unknown";
-
-/* UPDATE SLOT COLORS */
-
-for(let i=1;i<=8;i++){
-
-let slot = document.getElementById("slot"+i);
-
-if(data["slot"+i] === "Free"){
-
-slot.classList.add("free");
-
-}else{
-
-slot.classList.remove("free");
-
-}
-
-}
-
+const firebaseConfig = {
+  apiKey: "AIzaSyDueLvBiKpV2bxXMlXMjR7XZ1kVIMBzJL4",
+  authDomain: "smartparking-93ea8.firebaseapp.com",
+  databaseURL: "https://smartparking-93ea8-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smartparking-93ea8"
 };
 
-/* CONNECT TO MQTT */
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-client.connect({
+const parkingRef = ref(db, "parking");
 
-onSuccess:function(){
+function updateSlot(id, value) {
+  const el = document.getElementById(id);
 
-console.log("MQTT Connected");
-
-document.getElementById("status").innerText = "Waiting for data...";
-
-client.subscribe("kon/parking/data");
-
-},
-
-onFailure:function(){
-
-document.getElementById("status").innerText="Connection Failed";
-
+  if (value === 0) {
+    el.classList.add("free");   // green
+  } else {
+    el.classList.remove("free"); // red
+  }
 }
 
+onValue(parkingRef, (snapshot) => {
+  const data = snapshot.val();
+  if (!data) return;
+
+  updateSlot("slot1", data.slot1);
+  updateSlot("slot2", data.slot2);
+  updateSlot("slot3", data.slot3);
+  updateSlot("slot4", data.slot4);
+
+  document.getElementById("status").innerText =
+    data.available + " Slots Available";
 });
-
-
-/* SLOT BOOKING */
-
-function bookSlot(slotNumber){
-
-let slot = document.getElementById("slot"+slotNumber);
-
-if(slot.classList.contains("free")){
-
-let confirmBooking = confirm("Book Slot "+slotNumber+" ?");
-
-if(confirmBooking){
-
-slot.classList.remove("free");
-
-let booking = {
-slot:slotNumber,
-action:"book"
-};
-
-let message = new Paho.MQTT.Message(JSON.stringify(booking));
-
-message.destinationName = "kon/parking/booking";
-
-client.send(message);
-
-alert("Slot "+slotNumber+" booked successfully!");
-
-}
-
-}else{
-
-alert("Slot "+slotNumber+" is already occupied!");
-
-}
-
-}
-
 </script>
 
 </body>
 </html>
+```
